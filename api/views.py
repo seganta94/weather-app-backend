@@ -1,10 +1,45 @@
-import requests
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-import pandas as pd
+import requests # type: ignore
+from rest_framework.decorators import api_view # type: ignore
+from rest_framework.response import Response # type: ignore
+import pandas as pd # type: ignore
 import logging
 
 logger = logging.getLogger(__name__)
+
+API_KEY = '6iVB7qO2XtWfjF/qFdTzHg==WMSTE8dI64dqie80'
+
+@api_view(['GET'])
+def get_location(request):
+    city = request.GET.get('city')
+    logger.debug(f"Received request with city: {city}")
+
+    if city:
+        try:
+            url = f"https://api.api-ninjas.com/v1/geocoding?city={city}"
+            headers = {'X-Api-Key': API_KEY}
+            logger.debug(f"Making API request to {url} with headers: {headers}")
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+            logger.debug(f"API response data: {data}")
+
+            if not data:
+                return Response({"error": "No data found for the given city"}, status=404)
+
+            location_data = {
+                "name": data[0]['name'],
+                "latitude": data[0]['latitude'],
+                "longitude": data[0]['longitude'],
+                "country": data[0]['country']
+            }
+
+            logger.debug(f"Returning response: {location_data}")
+            return Response(location_data)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error processing request: {e.response.text if e.response else str(e)}")
+            return Response({"error": e.response.text if e.response else str(e)}, status=500)
+    return Response({"error": "City not provided"}, status=400)
 
 @api_view(['GET'])
 def get_weather(request):
