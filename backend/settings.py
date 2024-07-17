@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-)ib@ocdkthdcr5axv_c-xrfztyejg_&rgd6$0++@=+hv#edw&-
 DEBUG = True
 
 ALLOWED_HOSTS = ['44.211.171.166', 'weather-app-front.s3-website-us-east-1.amazonaws.com',
-                  'localhost', '127.0.0.1']
+                  'localhost', '127.0.0.1', 'ec2-44-212-24-82.compute-1.amazonaws.com']
 
 
 # Application definition
