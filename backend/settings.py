@@ -48,8 +48,11 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://weather-app-front.s3-website-us-east-1.amazonaws.com',
+    "http://weather-app-front.s3-website-us-east-1.amazonaws.com",
 ]
+
+# Uncomment if you want to allow all origins (use with caution in production)
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'backend.urls'
 
