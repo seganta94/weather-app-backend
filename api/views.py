@@ -1,12 +1,19 @@
-import requests # type: ignore
-from rest_framework.decorators import api_view # type: ignore
-from rest_framework.response import Response # type: ignore
-import pandas as pd # type: ignore
+import requests  # type: ignore
+from rest_framework.decorators import api_view  # type: ignore
+from rest_framework.response import Response  # type: ignore
+import pandas as pd  # type: ignore
 import logging
 
 logger = logging.getLogger(__name__)
 
 API_KEY = '6iVB7qO2XtWfjF/qFdTzHg==WMSTE8dI64dqie80'
+
+def add_cors_headers(response):
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response["Access-Control-Max-Age"] = "1000"
+    response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
+    return response
 
 @api_view(['GET'])
 def get_location(request):
@@ -25,7 +32,8 @@ def get_location(request):
             logger.debug(f"API response data: {data}")
 
             if not data:
-                return Response({"error": "No data found for the given city"}, status=404)
+                response = Response({"error": "No data found for the given city"}, status=404)
+                return add_cors_headers(response)
 
             location_data = {
                 "name": data[0]['name'],
@@ -35,11 +43,14 @@ def get_location(request):
             }
 
             logger.debug(f"Returning response: {location_data}")
-            return Response(location_data)
+            response = Response(location_data)
+            return add_cors_headers(response)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error processing request: {e.response.text if e.response else str(e)}")
-            return Response({"error": e.response.text if e.response else str(e)}, status=500)
-    return Response({"error": "City not provided"}, status=400)
+            response = Response({"error": e.response.text if e.response else str(e)}, status=500)
+            return add_cors_headers(response)
+    response = Response({"error": "City not provided"}, status=400)
+    return add_cors_headers(response)
 
 @api_view(['GET'])
 def get_weather(request):
@@ -84,14 +95,18 @@ def get_weather(request):
                     today_data['apparent_temperature_min'].append(daily_data['apparent_temperature_min'][i])
 
             if not today_data['time']:
-                return Response({"error": "No data available for today"}, status=404)
+                response = Response({"error": "No data available for today"}, status=404)
+                return add_cors_headers(response)
 
             daily_dataframe = pd.DataFrame(data=today_data)
             daily_data_json = daily_dataframe.to_json(orient='records', date_format='iso')
 
             logger.debug(f"Returning response: {daily_data_json}")
-            return Response(daily_data_json, content_type='application/json')
+            response = Response(daily_data_json, content_type='application/json')
+            return add_cors_headers(response)
         except Exception as e:
             logger.error(f"Error processing request: {e}")
-            return Response({"error": str(e)}, status=500)
-    return Response({"error": "Latitude and longitude not provided"}, status=400)
+            response = Response({"error": str(e)}, status=500)
+            return add_cors_headers(response)
+    response = Response({"error": "Latitude and longitude not provided"}, status=400)
+    return add_cors_headers(response)
